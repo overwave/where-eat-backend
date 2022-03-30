@@ -1,8 +1,9 @@
 --liquibase formatted sql
 
---changeset overwave:initial
-create table test1
+--changeset overwave:create_files_table
+create table if not exists file
 (
-    id   int primary key,
-    name varchar(255)
+    id   int  not null primary key,
+    path text not null,
+    size int  not null
 );
