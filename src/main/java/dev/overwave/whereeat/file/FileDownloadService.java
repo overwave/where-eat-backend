@@ -16,34 +16,36 @@ import static it.tdlight.jni.TdApi.UpdateFile;
 @Service
 @RequiredArgsConstructor
 public class FileDownloadService {
-    private final ConcurrentHashMap<FileDescriptor, CompletableFuture<LocalFile>> downloadQueue =
+    private final ConcurrentHashMap<FileDescriptor, CompletableFuture<FileDto>> downloadQueue =
             new ConcurrentHashMap<>();
 
     private final FeedService feedService;
 
     private final FileRepository fileRepository;
 
-    public CompletableFuture<LocalFile> getFile(FileDescriptor fileDescriptor) {
-        if (fileDescriptor.isDownloaded()) {
-            return CompletableFuture.completedFuture(fileDescriptor.file().local);
+    public CompletableFuture<FileDto> getFile(FileDescriptor descriptor) {
+        if (descriptor.file().local.isDownloadingCompleted) {
+            File savedFile = fileRepository.save(
+                    new File(descriptor.file().id, descriptor.file().local.path, descriptor.file().size));
+            return CompletableFuture.completedFuture(mapToDto(savedFile));
         }
 
-        return fileRepository.findById(fileDescriptor.fileId())
-                .map(this::mapToLocalFile)
+        return fileRepository.findById(descriptor.file().id)
+                .map(this::mapToDto)
                 .map(CompletableFuture::completedFuture)
-                .orElseGet(() -> getDownloading(fileDescriptor));
+                .orElseGet(() -> getDownloading(descriptor));
     }
 
-    private LocalFile mapToLocalFile(File file) {
-        return new LocalFile(file.getPath(), true, true, false, true, 0, file.getSize(), file.getSize());
+    private FileDto mapToDto(File file) {
+        return new FileDto(file.getId(), file.getPath(), file.getSize());
     }
 
-    private CompletableFuture<LocalFile> getDownloading(FileDescriptor file) {
+    private CompletableFuture<FileDto> getDownloading(FileDescriptor file) {
         return downloadQueue.computeIfAbsent(file, this::startDownloading);
     }
 
-    private CompletableFuture<LocalFile> startDownloading(FileDescriptor file) {
-        feedService.sendAsynchronously(new AddFileToDownloads(file.fileId(), file.chatId(), file.messageId(), 1));
+    private CompletableFuture<FileDto> startDownloading(FileDescriptor file) {
+        feedService.sendAsynchronously(new AddFileToDownloads(file.file().id, file.chatId(), file.messageId(), 1));
         return new CompletableFuture<>();
     }
 
@@ -56,9 +58,9 @@ public class FileDownloadService {
         TdApi.File file = update.file;
         LocalFile localFile = file.local;
         if (localFile.isDownloadingCompleted) {
-            FileDescriptor descriptor = new FileDescriptor(file.id, -1, -1, file);
-            fileRepository.save(new File(file.id, localFile.path, localFile.downloadedSize));
-            downloadQueue.remove(descriptor).complete(localFile);
+            FileDescriptor descriptor = new FileDescriptor(file, -1, -1);
+            File downloadedFile = fileRepository.save(new File(file.id, localFile.path, localFile.downloadedSize));
+            downloadQueue.remove(descriptor).complete(mapToDto(downloadedFile));
         } else if (localFile.isDownloadingActive) {
             System.out.println((localFile.downloadedSize * 100 / file.expectedSize) + "% downloaded");
         }

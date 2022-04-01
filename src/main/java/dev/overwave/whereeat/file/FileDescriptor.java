@@ -4,21 +4,17 @@ import java.util.Objects;
 
 import static it.tdlight.jni.TdApi.File;
 
-public record FileDescriptor(int fileId, long messageId, long chatId, File file) {
-    public boolean isDownloaded() {
-        return file.local.isDownloadingCompleted && !file.local.path.isBlank();
-    }
-
+public record FileDescriptor(File file, long messageId, long chatId) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FileDescriptor that = (FileDescriptor) o;
-        return fileId == that.fileId;
+        return file.id == that.file.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileId);
+        return Objects.hash(file.id);
     }
 }
