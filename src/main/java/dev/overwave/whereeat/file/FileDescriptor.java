@@ -1,10 +1,17 @@
 package dev.overwave.whereeat.file;
 
+import lombok.Value;
+
 import java.util.Objects;
 
 import static it.tdlight.jni.TdApi.File;
 
-public record FileDescriptor(File file, long messageId, long chatId) {
+@Value
+public class FileDescriptor {
+     File file;
+     long messageId;
+     long chatId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

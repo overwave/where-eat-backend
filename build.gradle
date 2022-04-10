@@ -27,10 +27,15 @@ dependencies {
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     implementation 'org.liquibase:liquibase-core'
     compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'commons-codec:commons-codec:1.15'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
 
     implementation platform('it.tdlight:tdlight-java-bom:2.8.1.2')
     implementation 'it.tdlight:tdlight-java'

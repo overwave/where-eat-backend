@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.feed;
+package dev.overwave.whereeat.chat;
 
 import it.tdlight.client.AuthenticationData;
 

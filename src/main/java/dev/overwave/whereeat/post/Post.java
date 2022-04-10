@@ -1,10 +1,11 @@
 package dev.overwave.whereeat.post;
 
+import dev.overwave.whereeat.core.entity.IntegerGen;
 import dev.overwave.whereeat.file.File;
+import dev.overwave.whereeat.util.StringUtils;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import lombok.Getter;
@@ -15,12 +16,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Post extends IntegerGen {
 
-    private boolean hidden;
+    private long messageId;
 
     private String text;
 
@@ -28,8 +26,21 @@ public class Post {
     @JoinColumn(name = "file_id")
     private File file;
 
-    public Post(String text, File file) {
+    @Enumerated(EnumType.STRING)
+    private PostType type;
+
+    private boolean hidden;
+
+    public Post(long messageId, String text, PostType type, File file) {
+        this.messageId = messageId;
         this.text = text;
+        this.type = type;
         this.file = file;
+    }
+
+    @Override
+    public String toString() {
+        String fileId = file != null ? ", file id: " + file.getId() : "";
+        return StringUtils.trimWithEllipsis(text, 10) + fileId;
     }
 }

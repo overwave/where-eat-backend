@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.feed;
+package dev.overwave.whereeat.chat;
 
 import it.tdlight.client.APIToken;
 import it.tdlight.client.AuthenticationData;
@@ -12,9 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -25,10 +24,10 @@ import java.util.concurrent.CountDownLatch;
 
 import static it.tdlight.jni.TdApi.*;
 
+@Slf4j
 @Service
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
-public class FeedService {
+public class ChatService {
     private final CountDownLatch authorizationLock = new CountDownLatch(1);
 
     private SimpleTelegramClient client;
@@ -60,7 +59,6 @@ public class FeedService {
         client = startClient();
 //        setTdlibParameters();
 //        checkDatabaseEncryption();
-
     }
 
     @SneakyThrows
@@ -96,7 +94,7 @@ public class FeedService {
             checkDatabaseEncryption();
         } else */
         if (state instanceof AuthorizationStateReady) {
-            System.out.println("auth success");
+            log.info("Authorization success");
             authorizationLock.countDown();
         } else {
 //            System.out.println(state);

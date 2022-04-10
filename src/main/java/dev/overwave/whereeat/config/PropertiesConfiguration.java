@@ -31,6 +31,8 @@ public class PropertiesConfiguration {
          * Chat title in Unicode encoding.
          */
         private String chatName;
+
+        private String crawlCron;
     }
 
     @Data

@@ -1,9 +1,10 @@
 package dev.overwave.whereeat.file;
 
-import dev.overwave.whereeat.feed.FeedService;
+import dev.overwave.whereeat.chat.ChatService;
 import it.tdlight.jni.TdApi;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -13,24 +14,25 @@ import static it.tdlight.jni.TdApi.AddFileToDownloads;
 import static it.tdlight.jni.TdApi.LocalFile;
 import static it.tdlight.jni.TdApi.UpdateFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileDownloadService {
     private final ConcurrentHashMap<FileDescriptor, CompletableFuture<FileDto>> downloadQueue =
             new ConcurrentHashMap<>();
 
-    private final FeedService feedService;
+    private final ChatService chatService;
 
     private final FileRepository fileRepository;
 
     public CompletableFuture<FileDto> getFile(FileDescriptor descriptor) {
-        if (descriptor.file().local.isDownloadingCompleted) {
+        if (descriptor.getFile().local.isDownloadingCompleted) {
             File savedFile = fileRepository.save(
-                    new File(descriptor.file().id, descriptor.file().local.path, descriptor.file().size));
+                    new File(descriptor.getFile().id, descriptor.getFile().local.path, descriptor.getFile().size));
             return CompletableFuture.completedFuture(mapToDto(savedFile));
         }
 
-        return fileRepository.findById(descriptor.file().id)
+        return fileRepository.findById(descriptor.getFile().id)
                 .map(this::mapToDto)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> getDownloading(descriptor));
@@ -45,13 +47,13 @@ public class FileDownloadService {
     }
 
     private CompletableFuture<FileDto> startDownloading(FileDescriptor file) {
-        feedService.sendAsynchronously(new AddFileToDownloads(file.file().id, file.chatId(), file.messageId(), 1));
+        chatService.sendAsynchronously(new AddFileToDownloads(file.getFile().id, file.getChatId(), file.getMessageId(), 1));
         return new CompletableFuture<>();
     }
 
     @PostConstruct
     private void attachUploadHandler() {
-        feedService.addUpdateHandler(UpdateFile.class, this::fileHandler);
+        chatService.addUpdateHandler(UpdateFile.class, this::fileHandler);
     }
 
     private void fileHandler(UpdateFile update) {
@@ -62,7 +64,7 @@ public class FileDownloadService {
             File downloadedFile = fileRepository.save(new File(file.id, localFile.path, localFile.downloadedSize));
             downloadQueue.remove(descriptor).complete(mapToDto(downloadedFile));
         } else if (localFile.isDownloadingActive) {
-            System.out.println((localFile.downloadedSize * 100 / file.expectedSize) + "% downloaded");
+            log.trace("{}% downloaded...", localFile.downloadedSize * 100 / file.expectedSize);
         }
     }
 }
