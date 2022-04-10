@@ -82,10 +82,9 @@ public class ChatReaderService {
 
         Message firstMessage = newMessages.get(0);
 
-        ScannedRange mergedRange = new ScannedRange(firstRange.getOrdinal(), firstMessage.id, firstRange.getMessageIdTo());
+        firstRange.setMessageIdFrom(firstMessage.id);
 
-        scannedRangeRepository.delete(firstRange);
-        scannedRangeRepository.save(mergedRange);
+        scannedRangeRepository.save(firstRange);
         return newMessages;
     }
 
@@ -112,7 +111,7 @@ public class ChatReaderService {
         Integer borderIndex = findRangeBorderIndex(messages.messages, secondRange.getMessageIdFrom());
 
         if (borderIndex == null) {
-            return saveSecondRangeBeforeThird(firstRange, secondRange, messages);
+            return saveSecondRangeBeforeThird(firstRange, messages);
         } else if (borderIndex == 0) {
             return mergeTwoRangesAndReturnEmpty(firstRange, secondRange);
         } else {
@@ -132,23 +131,21 @@ public class ChatReaderService {
     }
 
     private List<Message> mergeTwoRangesAndReturnEmpty(ScannedRange firstRange, ScannedRange secondRange) {
-        ScannedRange mergedRange = new ScannedRange(secondRange.getOrdinal(), firstRange.getMessageIdFrom(), secondRange.getMessageIdTo());
+        secondRange.setMessageIdFrom(firstRange.getMessageIdFrom());
 
         scannedRangeRepository.delete(firstRange);
-        scannedRangeRepository.delete(secondRange);
-        scannedRangeRepository.save(mergedRange);
+        scannedRangeRepository.save(secondRange);
 
         return List.of();
     }
 
-    private List<Message> saveSecondRangeBeforeThird(ScannedRange firstRange, ScannedRange secondRange, Messages messages) {
+    private List<Message> saveSecondRangeBeforeThird(ScannedRange firstRange, Messages messages) {
         List<Message> newMessages = Arrays.asList(messages.messages);
 
         Message lastMessage = newMessages.get(newMessages.size() - 1);
-        ScannedRange mergedRange = new ScannedRange(secondRange.getOrdinal(), firstRange.getMessageIdFrom(), lastMessage.id);
+        firstRange.setMessageIdTo(lastMessage.id);
 
-        scannedRangeRepository.delete(firstRange);
-        scannedRangeRepository.save(mergedRange);
+        scannedRangeRepository.save(firstRange);
         return newMessages;
     }
 
@@ -156,11 +153,10 @@ public class ChatReaderService {
                                                                 int borderIndex, Messages messages) {
         List<Message> newMessages = Arrays.asList(messages.messages).subList(0, borderIndex);
 
-        ScannedRange mergedRange = new ScannedRange(secondRange.getOrdinal(), firstRange.getMessageIdFrom(), secondRange.getMessageIdTo());
+        secondRange.setMessageIdFrom(firstRange.getMessageIdFrom());
 
         scannedRangeRepository.delete(firstRange);
-        scannedRangeRepository.delete(secondRange);
-        scannedRangeRepository.save(mergedRange);
+        scannedRangeRepository.save(secondRange);
         return newMessages;
     }
 

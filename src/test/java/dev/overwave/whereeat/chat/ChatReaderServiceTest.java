@@ -16,11 +16,11 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.List;
 
 import static dev.overwave.whereeat.chat.ChatReaderService.DEFAULT_MESSAGES_BATCH_SIZE;
+import static dev.overwave.whereeat.util.VerificationMode.once;
 import static it.tdlight.jni.TdApi.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -81,7 +81,7 @@ class ChatReaderServiceTest {
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID, LAST_MESSAGE_ID - 1, LAST_MESSAGE_ID - 2));
         verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 2));
@@ -109,7 +109,7 @@ class ChatReaderServiceTest {
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID - 6, LAST_MESSAGE_ID - 7, LAST_MESSAGE_ID - 8));
         verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 8));
@@ -137,7 +137,7 @@ class ChatReaderServiceTest {
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID, LAST_MESSAGE_ID - 1, LAST_MESSAGE_ID - 2));
         verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(1, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 2));
@@ -163,9 +163,9 @@ class ChatReaderServiceTest {
 
         assertThat(actualMessages)
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID));
-        verify(scannedRangeRepository).delete(any());
+        verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 100));
@@ -191,9 +191,9 @@ class ChatReaderServiceTest {
 
         assertThat(actualMessages)
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID, LAST_MESSAGE_ID - 1));
-        verify(scannedRangeRepository).delete(any());
+        verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 100));
@@ -219,8 +219,9 @@ class ChatReaderServiceTest {
 
         assertThat(actualMessages)
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID, LAST_MESSAGE_ID - 1, LAST_MESSAGE_ID - 2));
+        verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(1, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 2));
@@ -250,9 +251,9 @@ class ChatReaderServiceTest {
         List<Message> actualMessages = chatReaderService.getNewMessages();
 
         assertThat(actualMessages).isEmpty();
-        verify(scannedRangeRepository, times(2)).delete(any());
+        verify(scannedRangeRepository, once()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 100));
@@ -282,12 +283,12 @@ class ChatReaderServiceTest {
 
         assertThat(actualMessages)
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID - 4, LAST_MESSAGE_ID - 5, LAST_MESSAGE_ID - 6));
-        verify(scannedRangeRepository).delete(any());
+        verify(scannedRangeRepository, never()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
-                .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 6));
+                .isEqualTo(new ScannedRange(1, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 6));
     }
 
     /*
@@ -313,9 +314,9 @@ class ChatReaderServiceTest {
 
         assertThat(actualMessages)
                 .isEqualTo(Factory.messages(LAST_MESSAGE_ID - 4, LAST_MESSAGE_ID - 5));
-        verify(scannedRangeRepository, times(2)).delete(any());
+        verify(scannedRangeRepository, once()).delete(any());
         ArgumentCaptor<ScannedRange> captor = ArgumentCaptor.forClass(ScannedRange.class);
-        verify(scannedRangeRepository).save(captor.capture());
+        verify(scannedRangeRepository, once()).save(captor.capture());
         assertThat(captor.getValue())
                 .usingRecursiveComparison()
                 .isEqualTo(new ScannedRange(0, LAST_MESSAGE_ID, LAST_MESSAGE_ID - 100));

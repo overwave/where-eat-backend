@@ -14,20 +14,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 
-import static it.tdlight.jni.TdApi.*;
+import static it.tdlight.jni.TdApi.AuthorizationState;
+import static it.tdlight.jni.TdApi.AuthorizationStateReady;
+import static it.tdlight.jni.TdApi.Update;
+import static it.tdlight.jni.TdApi.UpdateAuthorizationState;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
+    private final BuildProperties buildProperties;
+
     private final CountDownLatch authorizationLock = new CountDownLatch(1);
 
     private SimpleTelegramClient client;
@@ -47,18 +51,9 @@ public class ChatService {
     @Value("${whereeat.path.downloads}")
     private String downloadsPath;
 
-    @Value("${whereeat.client.database-key}")
-    private String databaseEncryptionKey;
-
-
-    public void getHistory() {
-    }
-
     @PostConstruct
     private void initClient() {
         client = startClient();
-//        setTdlibParameters();
-//        checkDatabaseEncryption();
     }
 
     @SneakyThrows
@@ -67,6 +62,7 @@ public class ChatService {
         APIToken apiToken = new APIToken(apiId, apiHash);
         TDLibSettings settings = TDLibSettings.create(apiToken);
 
+        settings.setApplicationVersion(buildProperties.getVersion());
         settings.setDatabaseDirectoryPath(Paths.get(databasePath));
         settings.setDownloadedFilesDirectoryPath(Paths.get(downloadsPath));
 
@@ -84,51 +80,10 @@ public class ChatService {
     @SneakyThrows
     private void authorizationHandler(UpdateAuthorizationState update) {
         AuthorizationState state = update.authorizationState;
-        /*if (state instanceof AuthorizationStateWaitTdlibParameters) {
-            setTdlibParameters();
-        } else if (state instanceof AuthorizationStateWaitCode) {
-            System.out.println("enter code");
-            String code = new Scanner(System.in).nextLine();
-            sendSynchronously(new CheckAuthenticationCode(code));
-        } else if (state instanceof AuthorizationStateWaitEncryptionKey) {
-            checkDatabaseEncryption();
-        } else */
+
         if (state instanceof AuthorizationStateReady) {
             log.info("Authorization success");
             authorizationLock.countDown();
-        } else {
-//            System.out.println(state);
-        }
-    }
-
-    private void setTdlibParameters() {
-//        sendSynchronously(new SetTdlibParameters(new TdlibParameters(
-//                false,
-//                databasePath,
-//                downloadsPath,
-//                true,
-//                true,
-//                true,
-//                false,
-//                apiId,
-//                apiHash,
-//                "en-US",
-//                "where-eat-backend",
-//                null,
-//                "1.0.0-SNAPSHOT",
-//                true,
-//                true
-//        )));
-//        System.out.println("sent");
-    }
-
-    private void checkDatabaseEncryption() {
-        byte[] encryptionKey = databaseEncryptionKey.getBytes(StandardCharsets.UTF_8);
-        try {
-            Ok ok = sendSynchronously(new CheckDatabaseEncryptionKey(encryptionKey));
-            System.out.println(ok);
-        } catch (CompletionException e) {
-            sendSynchronously(new SetDatabaseEncryptionKey(encryptionKey));
         }
     }
 
