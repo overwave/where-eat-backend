@@ -1,8 +1,8 @@
-package dev.overwave.whereeat.post;
+package dev.overwave.whereeat.core.post;
 
 import dev.overwave.whereeat.core.entity.IntegerGen;
-import dev.overwave.whereeat.file.File;
-import dev.overwave.whereeat.util.StringUtils;
+import dev.overwave.whereeat.core.file.File;
+import dev.overwave.whereeat.core.util.StringUtils;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;

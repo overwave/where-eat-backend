@@ -1,7 +1,9 @@
 package dev.overwave.whereeat.chat;
 
-import dev.overwave.whereeat.post.ScannedRange;
-import dev.overwave.whereeat.post.ScannedRangeRepository;
+import dev.overwave.whereeat.core.chat.ChatReaderService;
+import dev.overwave.whereeat.core.chat.ChatService;
+import dev.overwave.whereeat.core.post.ScannedRange;
+import dev.overwave.whereeat.core.post.ScannedRangeRepository;
 import dev.overwave.whereeat.util.Factory;
 import it.tdlight.jni.TdApi;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
-import static dev.overwave.whereeat.chat.ChatReaderService.DEFAULT_MESSAGES_BATCH_SIZE;
+import static dev.overwave.whereeat.core.chat.ChatReaderService.DEFAULT_MESSAGES_BATCH_SIZE;
 import static dev.overwave.whereeat.util.VerificationMode.once;
 import static it.tdlight.jni.TdApi.*;
 import static org.assertj.core.api.Assertions.assertThat;

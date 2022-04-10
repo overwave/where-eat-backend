@@ -1,11 +1,13 @@
 package dev.overwave.whereeat.chat;
 
-import dev.overwave.whereeat.file.FileDownloadService;
-import dev.overwave.whereeat.file.FileRepository;
-import dev.overwave.whereeat.post.Post;
-import dev.overwave.whereeat.post.PostRepository;
-import dev.overwave.whereeat.post.ScannedRange;
-import dev.overwave.whereeat.post.ScannedRangeRepository;
+import dev.overwave.whereeat.core.chat.ChatCrawlerService;
+import dev.overwave.whereeat.core.chat.ChatService;
+import dev.overwave.whereeat.core.file.FileDownloadService;
+import dev.overwave.whereeat.core.file.FileRepository;
+import dev.overwave.whereeat.core.post.Post;
+import dev.overwave.whereeat.core.post.PostRepository;
+import dev.overwave.whereeat.core.post.ScannedRange;
+import dev.overwave.whereeat.core.post.ScannedRangeRepository;
 import dev.overwave.whereeat.util.Factory;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;

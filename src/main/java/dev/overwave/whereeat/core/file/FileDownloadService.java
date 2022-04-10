@@ -1,6 +1,6 @@
-package dev.overwave.whereeat.file;
+package dev.overwave.whereeat.core.file;
 
-import dev.overwave.whereeat.chat.ChatService;
+import dev.overwave.whereeat.core.chat.ChatService;
 import it.tdlight.jni.TdApi;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

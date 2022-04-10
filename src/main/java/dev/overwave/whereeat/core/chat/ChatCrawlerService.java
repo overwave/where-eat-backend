@@ -1,13 +1,13 @@
-package dev.overwave.whereeat.chat;
+package dev.overwave.whereeat.core.chat;
 
-import dev.overwave.whereeat.file.File;
-import dev.overwave.whereeat.file.FileDescriptor;
-import dev.overwave.whereeat.file.FileDownloadService;
-import dev.overwave.whereeat.file.FileDto;
-import dev.overwave.whereeat.post.Post;
-import dev.overwave.whereeat.post.PostRepository;
-import dev.overwave.whereeat.post.PostType;
-import dev.overwave.whereeat.util.StringUtils;
+import dev.overwave.whereeat.core.file.FileDownloadService;
+import dev.overwave.whereeat.core.util.StringUtils;
+import dev.overwave.whereeat.core.file.File;
+import dev.overwave.whereeat.core.file.FileDescriptor;
+import dev.overwave.whereeat.core.file.FileDto;
+import dev.overwave.whereeat.core.post.Post;
+import dev.overwave.whereeat.core.post.PostRepository;
+import dev.overwave.whereeat.core.post.PostType;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

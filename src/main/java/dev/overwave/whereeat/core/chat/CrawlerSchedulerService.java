@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.chat;
+package dev.overwave.whereeat.core.chat;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.post;
+package dev.overwave.whereeat.core.post;
 
 public enum PostType {
     TEXT,

@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.util;
+package dev.overwave.whereeat.core.util;
 
 import lombok.experimental.UtilityClass;
 

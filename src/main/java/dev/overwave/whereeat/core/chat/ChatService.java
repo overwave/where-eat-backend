@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.chat;
+package dev.overwave.whereeat.core.chat;
 
 import it.tdlight.client.APIToken;
 import it.tdlight.client.AuthenticationData;

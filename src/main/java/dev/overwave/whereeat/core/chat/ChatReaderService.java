@@ -1,8 +1,8 @@
-package dev.overwave.whereeat.chat;
+package dev.overwave.whereeat.core.chat;
 
-import dev.overwave.whereeat.post.LastRanges;
-import dev.overwave.whereeat.post.ScannedRange;
-import dev.overwave.whereeat.post.ScannedRangeRepository;
+import dev.overwave.whereeat.core.post.LastRanges;
+import dev.overwave.whereeat.core.post.ScannedRange;
+import dev.overwave.whereeat.core.post.ScannedRangeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

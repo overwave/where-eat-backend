@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.file;
+package dev.overwave.whereeat.core.file;
 
 import lombok.Value;
 

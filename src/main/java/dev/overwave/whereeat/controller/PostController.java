@@ -1,4 +1,4 @@
-package dev.overwave.whereeat;
+package dev.overwave.whereeat.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.config;
+package dev.overwave.whereeat.core.config;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
