@@ -2,13 +2,14 @@ package dev.overwave.whereeat.chat;
 
 import dev.overwave.whereeat.core.chat.ChatCrawlerService;
 import dev.overwave.whereeat.core.chat.ChatService;
-import dev.overwave.whereeat.core.file.FileDownloadService;
-import dev.overwave.whereeat.core.file.FileRepository;
-import dev.overwave.whereeat.core.post.Post;
-import dev.overwave.whereeat.core.post.PostRepository;
-import dev.overwave.whereeat.core.post.ScannedRange;
-import dev.overwave.whereeat.core.post.ScannedRangeRepository;
+import dev.overwave.whereeat.core.media.FileDownloadService;
+import dev.overwave.whereeat.core.media.MediaRepository;
+import dev.overwave.whereeat.core.message.Message;
+import dev.overwave.whereeat.core.message.MessageRepository;
+import dev.overwave.whereeat.core.message.ScannedRange;
+import dev.overwave.whereeat.core.message.ScannedRangeRepository;
 import dev.overwave.whereeat.util.Factory;
+import it.tdlight.jni.TdApi;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ class ChatCrawlerServiceTest {
 
     private final ScannedRangeRepository scannedRangeRepository;
 
-    private final PostRepository postRepository;
+    private final MessageRepository messageRepository;
 
-    private final FileRepository fileRepository;
+    private final MediaRepository mediaRepository;
 
     @MockBean
     private ChatService chatService;
@@ -52,7 +53,7 @@ class ChatCrawlerServiceTest {
 
     @BeforeEach
     void beforeEachSetup() {
-        Message lastMessage = new Message();
+        TdApi.Message lastMessage = new TdApi.Message();
         lastMessage.id = LAST_MESSAGE_ID;
 
         Chat chat = new Chat();
@@ -61,7 +62,7 @@ class ChatCrawlerServiceTest {
         chat.lastMessage = lastMessage;
 
         Messages messages = new Messages();
-        messages.messages = Factory.videoMessages(1, 2, 3, 4, 5).toArray(Message[]::new);
+        messages.messages = Factory.videoMessages(1, 2, 3, 4, 5).toArray(TdApi.Message[]::new);
 
         when(chatService.sendSynchronously(any(GetChats.class)))
                 .thenReturn(new Chats(1, new long[]{TEST_CHAT_ID}));
@@ -71,8 +72,8 @@ class ChatCrawlerServiceTest {
                 .thenReturn(messages);
 
         scannedRangeRepository.deleteAll();
-        postRepository.deleteAll();
-        fileRepository.deleteAll();
+        messageRepository.deleteAll();
+        mediaRepository.deleteAll();
     }
 
     @Test
@@ -80,13 +81,13 @@ class ChatCrawlerServiceTest {
         chatCrawlerService.crawl();
 
         List<ScannedRange> scannedRanges = scannedRangeRepository.findAll();
-        List<Post> posts = postRepository.findAll();
+        List<Message> messages = messageRepository.findAll();
 
         assertThat(scannedRanges)
                 .usingRecursiveComparison()
                 .ignoringFields("id")
                 .isEqualTo(List.of(new ScannedRange(0, 1, 5)));
-        assertThat(posts)
+        assertThat(messages)
                 .hasSize(5);
     }
 
@@ -100,13 +101,13 @@ class ChatCrawlerServiceTest {
                 .doCallRealMethod()
                 .doThrow(expectedException)
                 .when(fileDownloadService)
-                .getFile(any());
+                .getMedia(any());
 
         assertThatThrownBy(chatCrawlerService::crawl)
                 .isEqualTo(expectedException);
 
         assertThat(scannedRangeRepository.findAll()).isEmpty();
-        assertThat(postRepository.findAll()).isEmpty();
-        assertThat(fileRepository.findAll()).isEmpty();
+        assertThat(messageRepository.findAll()).isEmpty();
+        assertThat(mediaRepository.findAll()).isEmpty();
     }
 }

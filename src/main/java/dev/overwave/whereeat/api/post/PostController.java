@@ -1,7 +1,5 @@
-package dev.overwave.whereeat.controller;
+package dev.overwave.whereeat.api.post;
 
-import dev.overwave.whereeat.core.post.Post;
-import dev.overwave.whereeat.core.post.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostRepository postRepository;
+    private final PostService postService;
 
-    @GetMapping("/posts/")
-    public Page<Post> getPosts(@PageableDefault Pageable pageable) {
-        return postRepository.findAll(pageable);
+    @GetMapping("/")
+    public Page<PostDto> getPosts(@PageableDefault Pageable pageable) {
+        return postService.getPosts(pageable);
     }
 }

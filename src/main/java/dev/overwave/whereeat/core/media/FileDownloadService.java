@@ -1,9 +1,11 @@
-package dev.overwave.whereeat.core.file;
+package dev.overwave.whereeat.core.media;
 
 import dev.overwave.whereeat.core.chat.ChatService;
+import dev.overwave.whereeat.core.util.FileUtils;
 import it.tdlight.jni.TdApi;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,36 +20,35 @@ import static it.tdlight.jni.TdApi.UpdateFile;
 @Service
 @RequiredArgsConstructor
 public class FileDownloadService {
-    private final ConcurrentHashMap<FileDescriptor, CompletableFuture<FileDto>> downloadQueue =
+    private final ConcurrentHashMap<FileDescriptor, CompletableFuture<Media>> downloadQueue =
             new ConcurrentHashMap<>();
 
     private final ChatService chatService;
 
-    private final FileRepository fileRepository;
+    private final MediaRepository mediaRepository;
 
-    public CompletableFuture<FileDto> getFile(FileDescriptor descriptor) {
-        if (descriptor.getFile().local.isDownloadingCompleted) {
-            File savedFile = fileRepository.save(
-                    new File(descriptor.getFile().id, descriptor.getFile().local.path, descriptor.getFile().size));
-            return CompletableFuture.completedFuture(mapToDto(savedFile));
+    @SneakyThrows
+    public CompletableFuture<Media> getMedia(FileDescriptor descriptor) {
+        TdApi.File file = descriptor.file();
+        if (file.local.isDownloadingCompleted) {
+            byte[] blob = FileUtils.readBlob(file.local.path);
+            String filename = FileUtils.getFilename(file.local.path);
+
+            Media media = mediaRepository.save(new Media(file.remote.uniqueId + filename, blob));
+            return CompletableFuture.completedFuture(media);
         }
 
-        return fileRepository.findById(descriptor.getFile().id)
-                .map(this::mapToDto)
+        return mediaRepository.findById(file.remote.uniqueId)
                 .map(CompletableFuture::completedFuture)
                 .orElseGet(() -> getDownloading(descriptor));
     }
 
-    private FileDto mapToDto(File file) {
-        return new FileDto(file.getId(), file.getPath(), file.getSize());
-    }
-
-    private CompletableFuture<FileDto> getDownloading(FileDescriptor file) {
+    private CompletableFuture<Media> getDownloading(FileDescriptor file) {
         return downloadQueue.computeIfAbsent(file, this::startDownloading);
     }
 
-    private CompletableFuture<FileDto> startDownloading(FileDescriptor file) {
-        chatService.sendAsynchronously(new AddFileToDownloads(file.getFile().id, file.getChatId(), file.getMessageId(), 1));
+    private CompletableFuture<Media> startDownloading(FileDescriptor file) {
+        chatService.sendAsynchronously(new AddFileToDownloads(file.file().id, file.chatId(), file.messageId(), 1));
         return new CompletableFuture<>();
     }
 
@@ -56,13 +57,18 @@ public class FileDownloadService {
         chatService.addUpdateHandler(UpdateFile.class, this::fileHandler);
     }
 
+    @SneakyThrows
     private void fileHandler(UpdateFile update) {
         TdApi.File file = update.file;
         LocalFile localFile = file.local;
         if (localFile.isDownloadingCompleted) {
             FileDescriptor descriptor = new FileDescriptor(file, -1, -1);
-            File downloadedFile = fileRepository.save(new File(file.id, localFile.path, localFile.downloadedSize));
-            downloadQueue.remove(descriptor).complete(mapToDto(downloadedFile));
+
+            byte[] blob = FileUtils.readBlob(localFile.path);
+            String filename = FileUtils.getFilename(localFile.path);
+            Media media = mediaRepository.save(new Media(file.remote.uniqueId + filename, blob));
+
+            downloadQueue.remove(descriptor).complete(media);
         } else if (localFile.isDownloadingActive) {
             log.trace("{}% downloaded...", localFile.downloadedSize * 100 / file.expectedSize);
         }

@@ -1,4 +1,4 @@
-package dev.overwave.whereeat.core.post;
+package dev.overwave.whereeat.core.message;
 
 import dev.overwave.whereeat.core.entity.LongGen;
 import javax.persistence.Entity;

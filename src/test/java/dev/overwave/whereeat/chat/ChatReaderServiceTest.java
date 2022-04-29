@@ -2,8 +2,8 @@ package dev.overwave.whereeat.chat;
 
 import dev.overwave.whereeat.core.chat.ChatReaderService;
 import dev.overwave.whereeat.core.chat.ChatService;
-import dev.overwave.whereeat.core.post.ScannedRange;
-import dev.overwave.whereeat.core.post.ScannedRangeRepository;
+import dev.overwave.whereeat.core.message.ScannedRange;
+import dev.overwave.whereeat.core.message.ScannedRangeRepository;
 import dev.overwave.whereeat.util.Factory;
 import it.tdlight.jni.TdApi;
 import lombok.RequiredArgsConstructor;
