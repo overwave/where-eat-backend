@@ -1,12 +1,16 @@
 package dev.overwave.whereeat.api.post;
 
+import com.google.common.collect.Streams;
 import dev.overwave.whereeat.api.media.MediaDto;
+import dev.overwave.whereeat.core.media.Media;
 import dev.overwave.whereeat.core.message.Message;
 import dev.overwave.whereeat.core.message.MessageRepository;
 import dev.overwave.whereeat.core.message.MessageType;
+import dev.overwave.whereeat.core.util.MediaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,12 +41,17 @@ public class PostService {
                     .forEach(attachments::add);
 
             if (message.getType() != MessageType.TEXT) {
-                media.add(new MediaDto(message.getMedia().getId(), message.getType()));
+                Media m = message.getMedia();
+                media.add(new MediaDto(m.getId(), m.getWidth(), m.getHeight(), message.getType()));
             }
 
             builder.append(message.getText());
         }
+        List<Pair<Integer, Integer>> sizes = media.stream().map(m -> Pair.of(m.width(), m.height())).toList();
+        List<Pair<Integer, Integer>> justifiedSizes = MediaUtils.justify(sizes, 600, 300, 6);
 
-        return new PostDto(firstMessage.getMessageId(), builder.toString(), attachments, media);
+        List<MediaDto> justifiedMedia = Streams.zip(media.stream(), justifiedSizes.stream(), MediaDto::withSize).toList();
+
+        return new PostDto(firstMessage.getMessageId(), builder.toString(), attachments, justifiedMedia);
     }
 }

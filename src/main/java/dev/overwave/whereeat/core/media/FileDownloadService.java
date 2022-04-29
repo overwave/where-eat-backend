@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,10 +32,8 @@ public class FileDownloadService {
     public CompletableFuture<Media> getMedia(FileDescriptor descriptor) {
         TdApi.File file = descriptor.file();
         if (file.local.isDownloadingCompleted) {
-            byte[] blob = FileUtils.readBlob(file.local.path);
-            String filename = FileUtils.getFilename(file.local.path);
+            Media media = saveFile(file.local.path, file.remote.uniqueId);
 
-            Media media = mediaRepository.save(new Media(file.remote.uniqueId + filename, blob));
             return CompletableFuture.completedFuture(media);
         }
 
@@ -57,20 +56,25 @@ public class FileDownloadService {
         chatService.addUpdateHandler(UpdateFile.class, this::fileHandler);
     }
 
-    @SneakyThrows
     private void fileHandler(UpdateFile update) {
         TdApi.File file = update.file;
         LocalFile localFile = file.local;
         if (localFile.isDownloadingCompleted) {
             FileDescriptor descriptor = new FileDescriptor(file, -1, -1);
-
-            byte[] blob = FileUtils.readBlob(localFile.path);
-            String filename = FileUtils.getFilename(localFile.path);
-            Media media = mediaRepository.save(new Media(file.remote.uniqueId + filename, blob));
+            Media media = saveFile(localFile.path, file.remote.uniqueId);
 
             downloadQueue.remove(descriptor).complete(media);
         } else if (localFile.isDownloadingActive) {
             log.trace("{}% downloaded...", localFile.downloadedSize * 100 / file.expectedSize);
         }
+    }
+
+    @SneakyThrows
+    private Media saveFile(String path, String uniqueId) {
+        byte[] blob = FileUtils.readBlob(path);
+        String filename = FileUtils.getFilename(path);
+        Pair<Integer, Integer> size = FileUtils.getMediaDimensions(path);
+
+        return mediaRepository.save(new Media(uniqueId + filename, size.getFirst(), size.getSecond(), blob));
     }
 }

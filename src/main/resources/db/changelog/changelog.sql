@@ -38,6 +38,8 @@ drop table if exists file cascade;
 create table if not exists media
 (
     id     text  not null unique primary key,
+    width  int   not null,
+    height int   not null,
     "data" bytea not null
 );
 

@@ -18,6 +18,10 @@ public class Media {
     @Id
     private String id;
 
+    private int width;
+
+    private int height;
+
     @Lob
     @Type(type = "org.hibernate.type.BinaryType")
     private byte[] data;
