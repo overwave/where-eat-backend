@@ -35,11 +35,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
                     .toList();
             Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(user, token, roles);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            chain.doFilter(request, response);
-        } else {
-            SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "invalid credentials");
         }
+        chain.doFilter(request, response);
     }
 }
