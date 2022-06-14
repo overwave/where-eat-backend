@@ -20,11 +20,14 @@ public class TextAttachment extends LongGen {
     @Column(name = "_offset")
     private int offset;
 
+    @Column(name = "_length")
     private int length;
 
+    @Column(name = "_type")
     @Enumerated(EnumType.STRING)
     private AttachmentType type;
 
+    @Column(name = "_value")
     private String value;
 
     @ManyToOne

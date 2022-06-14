@@ -3,9 +3,9 @@
 --changeset overwave:create_files_table
 create table if not exists file
 (
-    id   serial not null primary key,
-    path text   not null,
-    size int    not null
+    id    serial not null primary key,
+    _path text   not null,
+    size  int    not null
 );
 
 --changeset overwave:create_posts_table
@@ -13,7 +13,7 @@ create table if not exists post
 (
     id      serial  not null primary key,
     hidden  boolean not null default false,
-    text    text    not null,
+    _text   text    not null,
     file_id int references file (id)
 );
 
@@ -50,15 +50,15 @@ create table if not exists article
 
 create table if not exists message
 (
-    id          serial    not null unique primary key,
-    message_id  bigint    not null,
-    "text"      text      not null,
-    article_id  int references article (id),
-    media_id    text references media (id),
-    group_id    text      not null,
-    "timestamp" timestamp not null,
-    hidden      boolean   not null default false,
-    "type"      text      not null
+    id         serial    not null unique primary key,
+    message_id bigint    not null,
+    _text      text      not null,
+    article_id int references article (id),
+    media_id   text references media (id),
+    group_id   text      not null,
+    _timestamp timestamp not null,
+    hidden     boolean   not null default false,
+    _type      text      not null
 );
 create unique index message_id_idx on message (message_id);
 
@@ -66,8 +66,28 @@ create table if not exists text_attachment
 (
     id         bigserial not null unique primary key,
     message_id int       not null references message (id),
-    "type"     text      not null,
+    _type      text      not null,
     _offset    int       not null,
-    "length"   int       not null,
-    "value"    text
+    _length    int       not null,
+    _value     text
+);
+
+--changeset overwave:users_tables
+create table if not exists _user
+(
+    id          serial not null unique primary key,
+    email       text   not null unique,
+    roles       text[] not null,
+    id_provider text   not null,
+    external_id text   not null,
+    _name       text   not null,
+    family_name text   not null,
+    given_name  text   not null,
+    picture_url text
+);
+create table if not exists session
+(
+    id      serial not null unique primary key,
+    user_id int    not null references _user (id),
+    token   text   not null unique
 );

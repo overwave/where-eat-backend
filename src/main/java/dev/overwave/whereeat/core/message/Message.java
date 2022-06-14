@@ -19,6 +19,7 @@ public class Message extends IntegerGen {
 
     private long messageId;
 
+    @Column(name = "_text")
     private String text;
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
@@ -29,8 +30,10 @@ public class Message extends IntegerGen {
     private Media media;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "_type")
     private MessageType type;
 
+    @Column(name = "_timestamp")
     private Instant timestamp;
 
     private boolean hidden;
