@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,9 +17,9 @@ public class GoogleLoginController {
 
     @SneakyThrows
     @PostMapping("/public/login/google")
-    public ResponseEntity<String> loginWithGoogleIdentity(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<LoginResponseDto> loginWithGoogleIdentity(@RequestBody LoginRequestDto loginRequest) {
         return googleLoginService.loginWithGoogle(loginRequest.token())
                 .map(ResponseEntity::ok)
-                .orElse(new ResponseEntity<>("invalid token", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
 }

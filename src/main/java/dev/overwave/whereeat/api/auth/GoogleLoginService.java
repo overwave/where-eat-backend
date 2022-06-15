@@ -8,6 +8,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import dev.overwave.whereeat.core.auth.Role;
 import dev.overwave.whereeat.core.auth.Session;
 import dev.overwave.whereeat.core.auth.User;
+import dev.overwave.whereeat.core.auth.UserPrincipal;
 import dev.overwave.whereeat.core.auth.UserRepository;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +38,7 @@ public class GoogleLoginService {
     }
 
     @SneakyThrows
-    public Optional<String> loginWithGoogle(String jwtIdToken) {
+    public Optional<LoginResponseDto> loginWithGoogle(String jwtIdToken) {
         GoogleIdToken idToken = tokenVerifier.verify(jwtIdToken);
         if (idToken == null) {
             return Optional.empty();
@@ -49,7 +50,7 @@ public class GoogleLoginService {
 
         Session session = createSession(user);
         userRepository.save(user);
-        return Optional.of(session.getToken());
+        return Optional.of(new LoginResponseDto(UserPrincipal.map(user), session.getToken()));
     }
 
     private Session createSession(User user) {
